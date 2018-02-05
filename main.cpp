@@ -82,11 +82,12 @@ void getTarget(int index, int64 pBlockTime, int64 ppBlockTime, unsigned int prev
 	int64 rOp = ((interval - 1) * targetSpacing + actualSpacing + actualSpacing);
 	cout << "Val after first op: " << bnNew.GetCompact() << " (" << padString(bnNew.GetHex()) << "). Right operand: " << rOp << "\n";
 	bnNew /= ((interval + 1) * targetSpacing);
+	rOp = ((interval + 1) * targetSpacing);
 	if (bnNew > maxTarget) {
 		cout << "New target (" << bnNew.GetCompact() << ") greater than max target! Setting to max target: " << maxTarget.GetCompact() << "\n";
 		bnNew = maxTarget;
 	}
-	cout << "New target is: " << bnNew.GetCompact() << " (" << padString(bnNew.GetHex()) << ")\n";
+	cout << "New target is: " << bnNew.GetCompact() << " (" << padString(bnNew.GetHex()) << "). Right operand: " << rOp << "\n";
 }
 
 int main(int argc, const char* argv[]) {
@@ -103,15 +104,15 @@ int main(int argc, const char* argv[]) {
 	cout << "Max target (" << padString(maxTarget.GetHex()) << ") as compact: " << maxTarget.GetCompact() << "\n";
 
 	CBigNum newNum;
-	newNum.SetCompact(504365055);
-	cout << "GetCompact(504365055): " << newNum.GetCompact() << "\n";
+	newNum.SetCompact(maxTarget.GetCompact());
+	cout << "GetCompact(" << newNum.GetCompact() << "): " << newNum.GetCompact() << "\n";
 
 	string cmpHex = newNum.GetHex();
-	cout << "GetCompact(504365055) as hex: " << cmpHex << "\n";
+	cout << "GetCompact(" << newNum.GetCompact() << ") as hex: " << padString(cmpHex) << "\n";
 
 	CBigNum hexNum;
 	hexNum.SetHex(cmpHex);
-	cout << "GetCompact() from hex: " << cmpHex << ": " << hexNum.GetCompact() << "\n";
+	cout << "GetCompact() from hex: " << padString(cmpHex) << ": " << hexNum.GetCompact() << "\n";
 
 	/*
 	int blocks[8][5] = {
