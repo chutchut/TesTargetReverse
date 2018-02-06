@@ -11,7 +11,7 @@ using namespace::std;
 
 
 struct Block {
-    int array[5];
+    int array[4];
 };
 
 string padString(string in) {
@@ -28,15 +28,14 @@ string padString(string in) {
 	return outStr;
 }
 
-Block getBlock(int index, int blocks[][5]) {
+Block getBlock(int index, int blocks[][4]) {
 	for (int i = 0; i < sizeof(blocks); i++) {
 		if (blocks[i][0] == index) {
 			Block b;
-			b.array[0] = blocks[i][0];
-			b.array[1] = blocks[i][1];
-			b.array[2] = blocks[i][2];
-			b.array[3] = blocks[i][3];
-			b.array[4] = blocks[i][4];
+			b.array[0] = blocks[i][0]; // Block index
+			b.array[1] = blocks[i][1]; // Timestamp
+			b.array[2] = blocks[i][2]; // Previous 'bits' value
+			b.array[3] = blocks[i][3]; // pos/pow flag (1 == pos)
 			return b;
 		}
 	}
@@ -45,27 +44,40 @@ Block getBlock(int index, int blocks[][5]) {
 	return nb;
 }
 
-const int GetLastBlockIndex(int index, int blocks[][5], bool fProofOfStake) {
+const int GetLastBlockIndex(int index, int blocks[][4], bool fProofOfStake) {
 	int pindex = index;
 	Block b = getBlock(pindex, blocks);
-    while (pindex > 0 && (pindex - 1) > 0 && ((b.array[4] == 1) != fProofOfStake))
+    while (pindex > 0 && (pindex - 1) > 0 && ((b.array[3] == 1) != fProofOfStake))
         pindex -= 1;
     	b = getBlock(pindex, blocks);
     return pindex;
 }
 
-void getTarget(int index, int blocks[][5]) {
+bool isNullBlock(Block block) {
+	if (block.array[0] == 0 && block.array[1] == 0 && block.array[2] == 0 && block.array[3] == 0) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+void getTarget(int index, int blocks[][4]) {
 
 	// Get the block for the current index
 	Block block = getBlock(index, blocks);
 
+	if (isNullBlock(block)) {
+		// Ignore null blocks
+		return;
+	}
+
 	// Previous bits for current block
-	unsigned int prevBits = block.array[3];
+	unsigned int prevBits = block.array[2];
 
 	// Set pos/pow and target based on type
 	bool fProofOfStake = false;
 	CBigNum maxTarget = bnProofOfWorkLimit;
-	if (block.array[4] == 1) {
+	if (block.array[3] == 1) {
 		fProofOfStake = true;
 		if(index + 1 > 15000)
 			maxTarget = bnProofOfStakeLimit;
@@ -75,7 +87,7 @@ void getTarget(int index, int blocks[][5]) {
 
 	// Get indexes with GetLastBlockIndex()
 	int pBlockHeight = GetLastBlockIndex(index, blocks, fProofOfStake);
-	int ppBlockHeight = GetLastBlockIndex(pBlockHeight - 1, blocks, fProofOfStake);
+	int ppBlockHeight = GetLastBlockIndex(pBlockHeight - 1, blocks, fProofOfStake); // Point to previous block with -1
 
 	// Get blocks for prev and prev-prev indexes
 	Block pblock = getBlock(pBlockHeight, blocks);
@@ -141,6 +153,16 @@ void getTarget(int index, int blocks[][5]) {
 	cout << "New target is: " << bnNew.GetCompact() << " (" << padString(bnNew.GetHex()) << "). Right operand: " << rOp << "\n";
 }
 
+void getTargets(int startIndex, int blocks[][4]) {
+
+	int arrLen = sizeof(blocks);
+
+	for (int i = 0, j = startIndex; i < arrLen; i++, j++) {
+		cout << blocks[i][0] << " :: " << blocks[i][1] << " :: " << blocks[i][2] << " :: " << blocks[i][3] << "\n";
+		getTarget(j, blocks);
+	}
+}
+
 int main(int argc, const char* argv[]) {
 
 	cout << "Max targets:\n";
@@ -165,26 +187,19 @@ int main(int argc, const char* argv[]) {
 	hexNum.SetHex(cmpHex);
 	cout << "GetCompact() from hex: " << padString(cmpHex) << ": " << hexNum.GetCompact() << "\n";
 
-	int blocks1to8[8][5] = {
-	   {1, 1390009623, 1389962782, 504365055, 0},
-	   {2, 1390009701, 1390009623, 504365055, 0},
-	   {3, 1390009747, 1390009701, 504365055, 0},
-	   {4, 1390009868, 1390009747, 504365055, 0},
-	   {5, 1390009984, 1390009868, 504365055, 0},
-	   {6, 1390010147, 1390009984, 504365055, 0},
-	   {7, 1390010322, 1390010147, 504365055, 0},
-	   {8, 1390010337, 1390010322, 504365055, 0}
+	int blocks1to8[8][4] = {
+	   {1, 1390009623, 504365055, 0},
+	   {2, 1390009701, 504365055, 0},
+	   {3, 1390009747, 504365055, 0},
+	   {4, 1390009868, 504365055, 0},
+	   {5, 1390009984, 504365055, 0},
+	   {6, 1390010147, 504365055, 0},
+	   {7, 1390010322, 504365055, 0},
+	   {8, 1390010337, 504365055, 0}
 	};
 
-	for (int i = 0, j = 1; i < 8; i++, j++) {
-		cout << blocks1to8[i][0] << " :: " << blocks1to8[i][1] << " :: " << blocks1to8[i][2] << " :: " << blocks1to8[i][3] << " :: " << blocks1to8[i][4] << "\n";
-		getTarget(j, blocks1to8);
-	}
+	/* Get multiple block targets from a multi-dim array of block data */
 
-	// Block 9
-	//getTarget(8, 1390010337, 1390010322, 504365055, 0);
-
-	// Block 88535
-	//getTarget(88535, 1392636015, 1392635990, 486651519, 1);
+	getTargets(1, blocks1to8); // Upto block 9
 
 }
