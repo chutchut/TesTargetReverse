@@ -2,6 +2,7 @@
 RE of TESlacoin GetNextTargetRequired()
 
 ```
+$ ./main 
 Max targets:
 0x00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 0x000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
@@ -10,8 +11,8 @@ Compacts:
 Max target (0x00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) as compact: 504365055
 SetCompact() nSize: 30
 GetCompact(504365055): 504365055
-GetCompact(504365055) as hex: fffff000000000000000000000000000000000000000000000000000000
-GetCompact() from hex: fffff000000000000000000000000000000000000000000000000000000: 504365055
+GetCompact(504365055) as hex: 0x00000fffff000000000000000000000000000000000000000000000000000000
+GetCompact() from hex: 0x00000fffff000000000000000000000000000000000000000000000000000000: 504365055
 Get target algo (pow) constants
 nStakeMinAge: 86400
 nStakeMaxAge: 7776000
@@ -31,5 +32,5 @@ interval: 460
 Setting bits in bignum
 SetCompact() nSize: 30
 Val after first op: 537091711 (0x035e7fca18000000000000000000000000000000000000000000000000000000). Right operand: 13800
-New target is: 504362780 (0x00000ff71c6f101aa7b47a2b5085468662d8929a609fee3add03e31fa7265113)
+New target is: 504362780 (0x00000ff71c6f101aa7b47a2b5085468662d8929a609fee3add03e31fa7265113). Right operand: 13830
 ```
