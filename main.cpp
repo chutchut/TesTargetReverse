@@ -35,7 +35,7 @@ Block getBlock(int index, int blocks[][4]) {
 			Block b;
 			b.array[0] = blocks[i][0]; // Block index
 			b.array[1] = blocks[i][1]; // Timestamp
-			b.array[2] = blocks[i][2]; // Previous 'bits' value
+			b.array[2] = blocks[i][2]; // Block 'bits' value
 			b.array[3] = blocks[i][3]; // pos/pow flag (1 == pos)
 			return b;
 		}
@@ -48,9 +48,12 @@ Block getBlock(int index, int blocks[][4]) {
 const int GetLastBlockIndex(int index, int blocks[][4], bool fProofOfStake) {
 	int pindex = index;
 	Block b = getBlock(pindex, blocks);
-    while (pindex > 0 && (pindex - 1) > 0 && ((b.array[3] == 1) != fProofOfStake))
-        pindex -= 1;
+	//cout << "GetLastBlockIndex() - entry block: " << b.array[0] << " :: " << b.array[1] << " :: " << b.array[2] << " :: " << b.array[3] << "\n";
+    while (pindex > 0 && (pindex - 1) > 0 && ((b.array[3] == 1) != fProofOfStake)) {
+        pindex--;
     	b = getBlock(pindex, blocks);
+    	//cout << "GetLastBlockIndex() - current block: " << b.array[0] << " :: " << b.array[1] << " :: " << b.array[2] << " :: " << b.array[3] << "\n";
+    }
     return pindex;
 }
 
@@ -72,9 +75,6 @@ void getTarget(int index, int blocks[][4]) {
 		return;
 	}
 
-	// Previous bits for current block
-	unsigned int prevBits = block.array[2];
-
 	// Set pos/pow and target based on type
 	bool fProofOfStake = false;
 	CBigNum maxTarget = bnProofOfWorkLimit;
@@ -87,12 +87,15 @@ void getTarget(int index, int blocks[][4]) {
 	}
 
 	// Get indexes with GetLastBlockIndex()
-	int pBlockHeight = GetLastBlockIndex(index, blocks, fProofOfStake);
-	int ppBlockHeight = GetLastBlockIndex(pBlockHeight - 1, blocks, fProofOfStake); // Point to previous block with -1
+	int pBlockHeight = GetLastBlockIndex(index, blocks, fProofOfStake); // Point to previous block with -1
+	int ppBlockHeight = GetLastBlockIndex(pBlockHeight - 1, blocks, fProofOfStake);
 
 	// Get blocks for prev and prev-prev indexes
 	Block pblock = getBlock(pBlockHeight, blocks);
 	Block ppblock = getBlock(ppBlockHeight, blocks);
+
+	// Previous bits from pBlockHeight
+	unsigned int prevBits = pblock.array[2];
 
 	// Set timestamps from above blocks
 	int64 pBlockTime = pblock.array[1];
@@ -151,7 +154,7 @@ void getTarget(int index, int blocks[][4]) {
 		cout << "New target (" << bnNew.GetCompact() << ") greater than max target! Setting to max target: " << maxTarget.GetCompact() << "\n";
 		bnNew = maxTarget;
 	}
-	cout << "New target is: " << bnNew.GetCompact() << " (" << padString(bnNew.GetHex()) << "). Right operand: " << rOp << "\n";
+	cout << "New target for block " << index + 1 << " is: " << bnNew.GetCompact() << " (" << padString(bnNew.GetHex()) << "). Right operand: " << rOp << "\n";
 }
 
 void getTargets(int startIndex, int arrLen, int blocks[][4]) {
@@ -187,7 +190,7 @@ int main(int argc, const char* argv[]) {
 	hexNum.SetHex(cmpHex);
 	cout << "GetCompact() from hex: " << padString(cmpHex) << ": " << hexNum.GetCompact() << "\n";
 
-	int blocks1to8[8][4] = {
+	int blocks1[9][4] = {
 			{1, 1390009623, 504365055, 0},
 			{2, 1390009701, 504365055, 0},
 			{3, 1390009747, 504365055, 0},
@@ -195,18 +198,20 @@ int main(int argc, const char* argv[]) {
 			{5, 1390009984, 504365055, 0},
 			{6, 1390010147, 504365055, 0},
 			{7, 1390010322, 504365055, 0},
-			{8, 1390010337, 504365055, 0}
+			{8, 1390010337, 504365055, 0},
+			{9, 1390010424, 504362780, 0},
 	};
 
-	int blocks88532to88535[4][4] = {
-			{88532, 1392635955, 486651228, 0},
-			{88533, 1392635968, 486651584, 0},
-			{88534, 1392635990, 486651519, 0},
-			{88535, 1392636015, 486651243, 1}
+	int blocks2[5][4] = {
+			{88532, 1392635955, 486651584, 0},
+			{88533, 1392635968, 486651519, 0},
+			{88534, 1392635990, 486651243, 0},
+			{88535, 1392636015, 503382015, 1},
+			{88536, 1392636021, 486650628, 0}
 	};
 
 	/* Get multiple block targets from a multi-dim array of block data */
 
-	getTargets(1, 8, blocks1to8); // Upto block 9
-	getTargets(88532, 4, blocks88532to88535); // 88532 - 88535
+	getTargets(1, 9, blocks1); // 2 - 10
+	getTargets(88532, 5, blocks2); // 88533 - 88537
 }
