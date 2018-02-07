@@ -2,6 +2,7 @@
 #include <string>
 #include "bignum.h"
 #include <array>
+#include <vector>
 
 static CBigNum bnProofOfWorkLimit(~uint256(0) >> 20);
 static CBigNum bnProofOfStakeLimit(~uint256(0) >> 24);
@@ -153,13 +154,12 @@ void getTarget(int index, int blocks[][4]) {
 	cout << "New target is: " << bnNew.GetCompact() << " (" << padString(bnNew.GetHex()) << "). Right operand: " << rOp << "\n";
 }
 
-void getTargets(int startIndex, int blocks[][4]) {
-
-	int arrLen = sizeof(blocks);
+void getTargets(int startIndex, int arrLen, int blocks[][4]) {
 
 	for (int i = 0, j = startIndex; i < arrLen; i++, j++) {
 		cout << blocks[i][0] << " :: " << blocks[i][1] << " :: " << blocks[i][2] << " :: " << blocks[i][3] << "\n";
 		getTarget(j, blocks);
+		cout << endl;
 	}
 }
 
@@ -188,18 +188,25 @@ int main(int argc, const char* argv[]) {
 	cout << "GetCompact() from hex: " << padString(cmpHex) << ": " << hexNum.GetCompact() << "\n";
 
 	int blocks1to8[8][4] = {
-	   {1, 1390009623, 504365055, 0},
-	   {2, 1390009701, 504365055, 0},
-	   {3, 1390009747, 504365055, 0},
-	   {4, 1390009868, 504365055, 0},
-	   {5, 1390009984, 504365055, 0},
-	   {6, 1390010147, 504365055, 0},
-	   {7, 1390010322, 504365055, 0},
-	   {8, 1390010337, 504365055, 0}
+			{1, 1390009623, 504365055, 0},
+			{2, 1390009701, 504365055, 0},
+			{3, 1390009747, 504365055, 0},
+			{4, 1390009868, 504365055, 0},
+			{5, 1390009984, 504365055, 0},
+			{6, 1390010147, 504365055, 0},
+			{7, 1390010322, 504365055, 0},
+			{8, 1390010337, 504365055, 0}
+	};
+
+	int blocks88532to88535[4][4] = {
+			{88532, 1392635955, 486651228, 0},
+			{88533, 1392635968, 486651584, 0},
+			{88534, 1392635990, 486651519, 0},
+			{88535, 1392636015, 486651243, 1}
 	};
 
 	/* Get multiple block targets from a multi-dim array of block data */
 
-	getTargets(1, blocks1to8); // Upto block 9
-
+	getTargets(1, 8, blocks1to8); // Upto block 9
+	getTargets(88532, 4, blocks88532to88535); // 88532 - 88535
 }
