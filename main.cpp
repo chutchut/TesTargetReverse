@@ -101,7 +101,6 @@ void getTarget(int index, int blocks[][4]) {
 
 	// Get blocks for prev and prev-prev indexes
 	Block pblock = getBlock(pBlockHeight, blocks);
-
 	Block ppblock = getBlock(ppBlockHeight, blocks);
 
 	// Previous bits from pBlockHeight
