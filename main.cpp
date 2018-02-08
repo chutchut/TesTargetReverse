@@ -45,11 +45,20 @@ Block getBlock(int index, int blocks[][4]) {
 	return nb;
 }
 
+bool isProofOfStake(int index, int blocks[][4]) {
+	try {
+		Block b = getBlock(index, blocks);
+		return (b.array[3] == 1);
+	} catch (int e) {
+		return false;
+	}
+}
+
 const int GetLastBlockIndex(int index, int blocks[][4], bool fProofOfStake) {
 	int pindex = index;
 	Block b = getBlock(pindex, blocks);
 	//cout << "GetLastBlockIndex() - entry block: " << b.array[0] << " :: " << b.array[1] << " :: " << b.array[2] << " :: " << b.array[3] << "\n";
-    while (pindex > 0 && (pindex - 1) > 0 && ((b.array[3] == 1) != fProofOfStake)) {
+    while (pindex > 0 && (pindex - 1) > 0 && isProofOfStake(pindex - 1, blocks) != fProofOfStake) {
         pindex--;
     	b = getBlock(pindex, blocks);
     	//cout << "GetLastBlockIndex() - current block: " << b.array[0] << " :: " << b.array[1] << " :: " << b.array[2] << " :: " << b.array[3] << "\n";
@@ -71,7 +80,7 @@ void getTarget(int index, int blocks[][4]) {
 	Block block = getBlock(index, blocks);
 
 	if (isNullBlock(block)) {
-		// Ignore null blocks
+		// Ignore null blocks and first block
 		return;
 	}
 
@@ -92,6 +101,7 @@ void getTarget(int index, int blocks[][4]) {
 
 	// Get blocks for prev and prev-prev indexes
 	Block pblock = getBlock(pBlockHeight, blocks);
+
 	Block ppblock = getBlock(ppBlockHeight, blocks);
 
 	// Previous bits from pBlockHeight
@@ -160,6 +170,9 @@ void getTarget(int index, int blocks[][4]) {
 void getTargets(int startIndex, int arrLen, int blocks[][4]) {
 
 	for (int i = 0, j = startIndex; i < arrLen; i++, j++) {
+		if (i == 0) {
+			continue;
+		}
 		cout << blocks[i][0] << " :: " << blocks[i][1] << " :: " << blocks[i][2] << " :: " << blocks[i][3] << "\n";
 		getTarget(j, blocks);
 		cout << endl;
@@ -205,8 +218,8 @@ int main(int argc, const char* argv[]) {
 	int blocks2[5][4] = {
 			{88532, 1392635955, 486651584, 0},
 			{88533, 1392635968, 486651519, 0},
-			{88534, 1392635990, 486651243, 0},
-			{88535, 1392636015, 503382015, 1},
+			{88534, 1392635990, 486651243, 1},
+			{88535, 1392636015, 503382015, 0},
 			{88536, 1392636021, 486650628, 0}
 	};
 
