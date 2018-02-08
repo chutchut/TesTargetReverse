@@ -57,11 +57,10 @@ bool isProofOfStake(int index, int blocks[][4]) {
 const int GetLastBlockIndex(int index, int blocks[][4], bool fProofOfStake) {
 	int pindex = index;
 	Block b = getBlock(pindex, blocks);
-	//cout << "GetLastBlockIndex() - entry block: " << b.array[0] << " :: " << b.array[1] << " :: " << b.array[2] << " :: " << b.array[3] << "\n";
+	// isProofOfStake(pindex - 1) as the flag is on the prev element
     while (pindex > 0 && (pindex - 1) > 0 && isProofOfStake(pindex - 1, blocks) != fProofOfStake) {
         pindex--;
     	b = getBlock(pindex, blocks);
-    	//cout << "GetLastBlockIndex() - current block: " << b.array[0] << " :: " << b.array[1] << " :: " << b.array[2] << " :: " << b.array[3] << "\n";
     }
     return pindex;
 }
@@ -217,7 +216,7 @@ int main(int argc, const char* argv[]) {
 	int blocks2[5][4] = {
 			{88532, 1392635955, 486651584, 0},
 			{88533, 1392635968, 486651519, 0},
-			{88534, 1392635990, 486651243, 1},
+			{88534, 1392635990, 486651243, 1}, // Flag previous block for pos
 			{88535, 1392636015, 503382015, 0},
 			{88536, 1392636021, 486650628, 0}
 	};
